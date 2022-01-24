@@ -19,14 +19,11 @@ class CreateRefundsTable extends Migration
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->unsignedBigInteger('vendor_id')->nullable();
             $table->foreign('vendor_id')->references('id')->on('users');
-            $table->unsignedBigInteger('size_id')->nullable();
-            $table->foreign('size_id')->references('id')->on('sizes');
+            $table->unsignedBigInteger('product_id')->nullable();
+            $table->foreign('product_id')->references('id')->on('products');
             $table->float('total_refund_amount',11,2);
             $table->integer('quantity');
-            $table->string('size');
-            $table->string('color');
             $table->string('refund_status')->default('not refunded yet');
-
             $table->float('subtotal_refund_amount',11,2);
             $table->float('taxes',11,2)->nullable();
             $table->float('price',11,2)->nullable();

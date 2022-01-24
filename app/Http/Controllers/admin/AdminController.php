@@ -23,12 +23,13 @@ class AdminController extends Controller
         $products=auth()->user()->products->where('isActive',1)->count();
         $inactive_products=auth()->user()->products()->where('isActive',0)->count();
         $inactive_colors_counter=0;
-        $inactive_colors=auth()->user()->products_colors->map(function($item) use(&$inactive_colors_counter){
-            if($item->sizes->sum('stock') == 0){
-                $inactive_colors_counter+=1;
-            }
-            return $item->sizes->sum('stock');
-        });
+        $inactive_colors=0;
+        //auth()->user()->products_colors->map(function($item) use(&$inactive_colors_counter){
+        //     if($item->sizes->sum('stock') == 0){
+        //         $inactive_colors_counter+=1;
+        //     }
+        //     return $item->sizes->sum('stock');
+        // });
         $total_amount=auth()->user()->orders->where('payment_status','paid')->sum('pivot.total_amount');
         return view('admin.dashboard',compact('products','orders','total_amount','current_month_orders','last_month_orders','inactive_products','inactive_colors_counter','total_refunds'));
 

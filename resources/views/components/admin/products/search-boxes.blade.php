@@ -5,11 +5,11 @@
                 <label for="category_name" class="control-label">{{__('text.Category Name')}}</label>
                 <select id="category_name" class="form-control" wire:model="category">
                     <option value="" selected class="bg-secondary text-white">- {{__('text.Choose Category')}}</option>
-                    @foreach(\App\Models\Category::withTrashed()->where('parent_id',0)->get() as $category)
+                    {{-- @foreach(\App\Models\Category::withTrashed()->where('parent_id',0)->get() as $category)
                     @php
                     recursion($category->id,'- ','bg-secondary');
                     @endphp
-                    @endforeach
+                    @endforeach --}}
                 </select>
             </div>
         </div>

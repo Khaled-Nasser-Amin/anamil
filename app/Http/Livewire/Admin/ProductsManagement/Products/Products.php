@@ -68,7 +68,7 @@ class Products extends Component
         $instance=new ProductController();
         $vendor_id=$instance->destroy($product);
         if($cat && $cat->products->count() == 0){
-            $this->deleteCategoryStatus($cat);
+            // $this->deleteCategoryStatus($cat);
         }
         session()->flash('success',__('text.Product Deleted Successfully') );
         create_activity('Product Deleted',auth()->user()->id,$vendor_id);
@@ -132,7 +132,7 @@ class Products extends Component
             $product->update([
                 'isActive'=>$status
             ]);
-            $this->updateCategoryStatus($product->category);
+            // $this->updateCategoryStatus($product->category);
             create_activity('Active a product',auth()->user()->id,$product->user_id);
 
         }else{
@@ -140,7 +140,7 @@ class Products extends Component
             $product->update([
                 'isActive'=>$status
             ]);
-            $this->deleteCategoryStatus($product->category);
+            // $this->deleteCategoryStatus($product->category);
             create_activity('Unactive a product',auth()->user()->id,$product->user_id);
         }
 
@@ -150,18 +150,21 @@ class Products extends Component
 
     //search and return products paginated
     protected function search(){
-       return Product::join('colors','colors.product_id','products.id')->select('products.*')->join('sizes','sizes.color_id','colors.id')->select('products.*')
-       ->when(auth()->user()->role != 'admin' || $this->filterProducts == 'My Products',function ($q) {
-        return $q->where('user_id',auth()->user()->id);
-        })
-        ->when($this->price,function ($q) {
-                return $q->where('colors.price','=',$this->price)->select('products.*');
-        })
+       return Product::
+    //    join('colors','colors.product_id','products.id')->select('products.*')->join('sizes','sizes.color_id','colors.id')->select('products.*')
+    //    ->when(auth()->user()->role != 'admin' || $this->filterProducts == 'My Products',function ($q) {
+    //     return $q->where('user_id',auth()->user()->id);
+    //     })
+    //     ->when($this->price,function ($q) {
+    //             return $q->where('colors.price','=',$this->price)->select('products.*');
+    //     })
 
-        ->when($this->size,function ($q) {
-            return $q->where('sizes.size','like','%'.$this->size.'%')->select('products.*');
-        })
-        ->when($this->store_name,function ($q) {
+        // ->
+        // when($this->size,function ($q) {
+        //     return $q->where('sizes.size','like','%'.$this->size.'%')->select('products.*');
+        // })
+        // ->
+        when($this->store_name,function ($q) {
             return $q->join('users','users.id','=','products.user_id')
             ->where('users.store_name','like','%'.$this->store_name.'%')->select('products.*');
         })
@@ -187,29 +190,29 @@ class Products extends Component
     }
 
 
-    //inactive or active category
-    protected function deleteCategoryStatus($cat){
-        if($cat->products->where('isActive',1)->count() != 0 || $cat->child_categories->where('status',1)->count() > 0){
-            return ;
-        }else{
-            $cat->update(['status' => 0]);
-            $cat->save();
-            if( $cat->parent_id == 0)
-                return;
-            $this->deleteCategoryStatus($cat->parent_category);
+    // //inactive or active category
+    // protected function deleteCategoryStatus($cat){
+    //     if($cat->products->where('isActive',1)->count() != 0 || $cat->child_categories->where('status',1)->count() > 0){
+    //         return ;
+    //     }else{
+    //         $cat->update(['status' => 0]);
+    //         $cat->save();
+    //         if( $cat->parent_id == 0)
+    //             return;
+    //         $this->deleteCategoryStatus($cat->parent_category);
 
-        }
-    }
+    //     }
+    // }
 
-    protected function updateCategoryStatus($cat){
-        if($cat->status == 1)
-            return ;
-        $cat->update(['status' => 1]);
-        $cat->save();
-        if($cat->parent_id == 0)
-            return;
-        $this->updateCategoryStatus($cat->parent_category);
+    // protected function updateCategoryStatus($cat){
+    //     if($cat->status == 1)
+    //         return ;
+    //     $cat->update(['status' => 1]);
+    //     $cat->save();
+    //     if($cat->parent_id == 0)
+    //         return;
+    //     $this->updateCategoryStatus($cat->parent_category);
 
 
-    }
+    // }
 }

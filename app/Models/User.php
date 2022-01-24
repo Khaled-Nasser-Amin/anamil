@@ -50,13 +50,13 @@ class User extends Authenticatable
         return $value ? asset('images/users/'.$value):'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
     }
 
-    public function products_colors(){
-        return $this->hasManyThrough(Color::class,Product::class,'user_id','product_id');
-    }
+    // public function products_colors(){
+    //     return $this->hasManyThrough(Color::class,Product::class,'user_id','product_id');
+    // }
 
-    public function orders_colors(){
-        return $this->products_colors()->has('order');
-    }
+    // public function orders_colors(){
+    //     return $this->products_colors()->has('order');
+    // }
 
     public function orders(){
         return $this->belongsToMany(Order::class,'order_vendor','vendor_id','order_id')->withPivot(['subtotal','taxes','total_amount']);

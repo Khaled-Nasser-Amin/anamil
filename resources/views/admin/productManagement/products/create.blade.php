@@ -62,19 +62,7 @@
 
     @livewireScripts
     <script>
-         window.Livewire.on('addColor',()=>{
-            $('#colorsAndPrices').modal('hide');
-        })
-         window.Livewire.on('updateColor',()=>{
-            $('#updateColorsAndPrices').modal('hide');
-        })
-        window.Livewire.on('addSize',e=>{
-            $('#sizeAndStock'+e).modal('hide');
-        })
 
-        window.Livewire.on('updateSize',e=>{
-            $('#updateSizeAndStock'+e).modal('hide');
-        })
         $('#my_multi_select1').multiSelect();
 
         window.addEventListener('success', e =>{

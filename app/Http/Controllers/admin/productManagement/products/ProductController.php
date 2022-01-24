@@ -15,10 +15,16 @@ class ProductController extends Controller
     public function store($request)
     {
         $this->authorize('create',Product::class);
-        $data=collect($request)->except(['category_id','image','colorsIndex'])->toArray();
+        $data=collect($request)->except(['groupImage','image','taxes_selected'])->toArray();
         $data=$this->livewireAddSingleImage($request,$data,'products');
         $product=Product::create($data);
-        $product->category()->associate($request['category_id'])->save();
+        if(auth()->user()->role == 'admin'){
+            $product->category()->associate($request['category_id'])->save();
+
+        }else{
+            $product->category()->associate(auth()->user()->category_id)->save();
+
+        }
         return $product;
     }
 
@@ -29,7 +35,7 @@ class ProductController extends Controller
         $product=Product::findOrFail($id);
 
         $this->authorize('update',$product);
-        $data=collect($request)->except(['image','colorsIndex','taxes_selected'])->toArray();
+        $data=collect($request)->except(['image','groupImage','taxes_selected'])->toArray();
         if ($request['image']){
             if(!$product->has('orders')){
                 $this->livewireDeleteSingleImage($product,'products');
