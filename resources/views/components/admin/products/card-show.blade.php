@@ -7,12 +7,9 @@
                         <div class="carousel-item active" >
                             <img src="{{$product->image}}" class="d-block w-100" alt="..." >
                         </div>
-                        @foreach($product->colors as $color)
+                        @foreach($product->images as $image)
                             <div class="carousel-item">
-
-                                @foreach ($color->images as $image)
-                                    <img src="{{$image->name}}" class="img-fluid d-block w-100 h-100" alt="...">
-                                @endforeach
+                                <img src="{{$image->name}}" class="img-fluid d-block w-100 h-100" alt="...">
                             </div>
                         @endforeach
                     </div>
@@ -53,7 +50,7 @@
 
                  <br><span class="text-pink"> {{__('text.Colors')}} </span>
                 <ul class="" style="height: auto!important;max-height:200px;overflow-y:scroll">
-                    @foreach($product->colors as $row)
+                    {{-- @foreach($product->colors as $row)
                         <li class="row  w-100 d-flex flex-column  ">
                             <div>
                                 <span style="background-color: {{ $row->color }}; width:30px;height:30px;border-radius:50%;display:inline-block"></span>
@@ -77,7 +74,7 @@
                             </div>
 
                         </li>
-                    @endforeach
+                    @endforeach --}}
                 </ul>
                 <ul>
                     <li><br><span class="text-pink">{{__('text.Type Of Fabric')}}</span>
@@ -100,16 +97,14 @@
                 <span class="text-pink">{{__('text.Description')}}</span>
                 <div class="slimscroll description_scroll mb-0">{{app()->getLocale() == 'ar' ?$product->description_ar:$product->description_en}}</div>
                 @endif
-                @if($product->additions)
-                <span class="text-pink">{{__('text.Additions')}}</span> | <span class="text-muted">{{$product->additions}}</span><br>
-                @endif
 
-                @can('update',$product)
+                {{-- @can('update',$product) --}}
+                @can('isAdmin')
                 <button id="changeFeatured" wire:click.prevent="updateFeatured({{$product->id}})" class="btn btn-{{$product->featured == 0 ? "secondary":"primary"}} mt-3 btn-rounded btn-bordered waves-effect width-md waves-light text-white d-block mx-auto w-75">{{__('text.Featured')}} <i class="far fa-star"></i></button>
                 @endcan
-                @can('isAdmin')
+                {{-- @can('isAdmin')
                 <button id="changeSliderFeatured" wire:click.prevent="updateAdminFeatured({{$product->id}})" class="btn btn-{{$product->featured_slider == 0 ? "secondary":"primary"}} mt-3 btn-rounded btn-bordered waves-effect width-md waves-light text-white d-block mx-auto w-75">{{__('text.Featured slider')}} <i class="far fa-star"></i></button>
-                @endcan
+                @endcan --}}
             </div>
         </div>
     </div>

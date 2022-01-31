@@ -36,13 +36,14 @@ class Product extends Model
         return $this->hasMany(Images::class);
     }
 
+    public function groups(){
+        return $this->belongsToMany(Product::class,'products_groups','child_product_id','parent_product_id')->withPivot(['quantity']);
+    }
 
-    // public function colors(){
-    //     return $this->hasMany(Color::class);
-    // }
-    // public function sizes(){
-    //     return $this->hasManyThrough(Size::class,Color::class);
-    // }
+    //this relation about existing product in table groups
+    public function child_products(){
+        return $this->belongsToMany(Product::class,'products_groups','parent_product_id','child_product_id')->withPivot(['quantity']);
+    }
 
     public function orders(){
         return $this->belongsToMany(Order::class,'orders_products')->withPivot(['name_ar','name_en','image']);

@@ -22,7 +22,7 @@
                         <div class="form-group row justify-content-between">
                             <div class="col-md-4 col-sm-6">
                                 <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton{{ $index }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" wire:key="{{ $loop->index }}">
+                                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton{{ $index }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
                                          @if (isset($value['product_id']) && !empty($value['product_id']))
                                             @php
                                                 $product=App\Models\Product::find($value['product_id']);
@@ -34,7 +34,7 @@
                                          @endif
                                     </button>
 
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $index }}" style="height: 200px;overflow-y:auto;" wire:key="{{ $loop->index }}">
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $index }}" style="height: 200px;overflow-y:auto;">
                                         @if ($products->count() > 0)
                                             @foreach ($products as $product )
                                             <a class="dropdown-item select_product" href="#"  data-index="{{ $index }}" data-product-id="{{ $product['id'] }}" >
@@ -52,14 +52,17 @@
                                 <x-general.input-error for="productsIndex.{{$index}}.product_id" />
                             </div>
 
-                            <div class="col-md-4 col-sm-6">
+                            <div class="col-md-4 col-sm-6" >
                                 <div class="input-group mb-3">
                                     <input type="text" wire:model="productsIndex.{{$index}}.quantity" data-index="{{ $index }}" placeholder="@lang('text.Quantity')" class="form-control d-block set_quantity">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text bg-dark text-white" id="basic-addon1">{{ $value['stock'] }}</span>
+                                    <div class="input-group-prepend" >
+                                      <span class="input-group-text bg-dark text-white" id="basic-addon{{ $index }}" wire:key="{{ $index }}">{{ $value['calc'] }}</span>
                                     </div>
+
                                 </div>
                                 <x-general.input-error for="productsIndex.{{$index}}.quantity" />
+                                <x-general.input-error for="productsIndex.{{$index}}.calc" />
+                                <x-general.input-error for="productsIndex.{{$index}}.stock" />
                             </div>
 
                             <div class="col-md-2 col-sm-12">
@@ -86,16 +89,19 @@
         let quantity=$(this).val();
         window.Livewire.emit('change_quantity',index,quantity)
 
-
-        // let index=$(this).data('index');
-        // let id=$(this).data('product-id');
-        // window.Livewire.emit('selected_product',index,id)
-        // @this.set('productsIndex.'+index+'.product_id',id)
-        // console.log(index,id);
-
+    })
+    $(document).on('change','#stock',function(){
+        let stock=$(this).val()
+        window.Livewire.emit('change_stock')
+        @this.set('stock',stock)
 
     })
+    $(document).on('keyup','#stock',function(){
+        let stock=$(this).val()
+        window.Livewire.emit('change_stock')
+        @this.set('stock',stock)
 
+    })
 
 </script>
 

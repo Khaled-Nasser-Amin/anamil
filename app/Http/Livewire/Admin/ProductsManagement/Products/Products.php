@@ -19,11 +19,8 @@ class Products extends Component
     public $price;
     public $category;
     public $productName;
-    public $size;
     public $store_name;
     public $date;
-    public $typeOfFabric;
-    public $typeOfSleeve;
     public $filterProducts;
 
     protected $listeners=['delete'];
@@ -36,8 +33,6 @@ class Products extends Component
             $this->category=$product->category_id;
             $this->size=$product->size;
             $this->date=$product->created_at;
-            $this->typeOfFabric=$product->typeOfFabric;
-            $this->typeOfSleeve=$product->typeOfSleeve;
             $this->productName=app()->getLocale() == 'ar' ? $product->name_ar:$product->name_en;
         }
 
@@ -102,27 +97,27 @@ class Products extends Component
 
 
     //update product's featured by admin  for slider
-    public function updateAdminFeatured(Product $product){
-        Gate::authorize('isAdmin');
-        $numberOfProducts=Product::where('featured_slider',1)->count();
-        if ($numberOfProducts < 10 || $product->featured_slider == 1){
-            if($product->featured_slider == 0 ){
-                $featured= 1;
-                create_activity('Added a product as a feature',auth()->user()->id,$product->user_id);
+    // public function updateAdminFeatured(Product $product){
+    //     Gate::authorize('isAdmin');
+    //     $numberOfProducts=Product::where('featured_slider',1)->count();
+    //     if ($numberOfProducts < 10 || $product->featured_slider == 1){
+    //         if($product->featured_slider == 0 ){
+    //             $featured= 1;
+    //             create_activity('Added a product as a feature',auth()->user()->id,$product->user_id);
 
-            }else{
-                $featured= 0;
-                create_activity('Removed a product as a feature',auth()->user()->id,$product->user_id);
-            }
+    //         }else{
+    //             $featured= 0;
+    //             create_activity('Removed a product as a feature',auth()->user()->id,$product->user_id);
+    //         }
 
-            $product->update([
-                'featured_slider'=>$featured
-            ]);
-        }else{
-            $this->dispatchBrowserEvent('danger',__('text.You have only 10 special products'));
-        }
+    //         $product->update([
+    //             'featured_slider'=>$featured
+    //         ]);
+    //     }else{
+    //         $this->dispatchBrowserEvent('danger',__('text.You have only 10 special products'));
+    //     }
 
-    }
+    // }
 
     //change product status
     public function updateStatus(Product $product){
@@ -151,13 +146,13 @@ class Products extends Component
     //search and return products paginated
     protected function search(){
        return Product::
-    //    join('colors','colors.product_id','products.id')->select('products.*')->join('sizes','sizes.color_id','colors.id')->select('products.*')
-    //    ->when(auth()->user()->role != 'admin' || $this->filterProducts == 'My Products',function ($q) {
-    //     return $q->where('user_id',auth()->user()->id);
-    //     })
-    //     ->when($this->price,function ($q) {
-    //             return $q->where('colors.price','=',$this->price)->select('products.*');
-    //     })
+        //    join('colors','colors.product_id','products.id')->select('products.*')->join('sizes','sizes.color_id','colors.id')->select('products.*')
+        //    ->when(auth()->user()->role != 'admin' || $this->filterProducts == 'My Products',function ($q) {
+        //     return $q->where('user_id',auth()->user()->id);
+        //     })
+        //     ->when($this->price,function ($q) {
+        //             return $q->where('colors.price','=',$this->price)->select('products.*');
+        //     })
 
         // ->
         // when($this->size,function ($q) {
@@ -178,41 +173,10 @@ class Products extends Component
                 })
                     ->when($this->date,function ($q)  {
                     return $q->whereDate('products.created_at',$this->date);
-                })
-                ->when($this->typeOfFabric,function ($q)  {
-                    return $q->where('products.typeOfFabric','like','%'.$this->typeOfFabric.'%');
-                })
-                ->when($this->typeOfSleeve,function ($q)  {
-                    return $q->where('products.typeOfSleeve','like','%'.$this->typeOfSleeve.'%');
                 });
             })
             ->distinct('products.id')->latest('products.created_at')->paginate(12);
     }
 
 
-    // //inactive or active category
-    // protected function deleteCategoryStatus($cat){
-    //     if($cat->products->where('isActive',1)->count() != 0 || $cat->child_categories->where('status',1)->count() > 0){
-    //         return ;
-    //     }else{
-    //         $cat->update(['status' => 0]);
-    //         $cat->save();
-    //         if( $cat->parent_id == 0)
-    //             return;
-    //         $this->deleteCategoryStatus($cat->parent_category);
-
-    //     }
-    // }
-
-    // protected function updateCategoryStatus($cat){
-    //     if($cat->status == 1)
-    //         return ;
-    //     $cat->update(['status' => 1]);
-    //     $cat->save();
-    //     if($cat->parent_id == 0)
-    //         return;
-    //     $this->updateCategoryStatus($cat->parent_category);
-
-
-    // }
 }

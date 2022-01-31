@@ -706,7 +706,7 @@ return [
     'In City'=>'In City',
     'Anywhere'=>'Anywhere',
     'Shipping place'=>'Shipping place',
-    ''=>'',
+    'Out of stock'=>'Out of stock',
     ''=>'',
     ''=>'',
     ''=>'',
