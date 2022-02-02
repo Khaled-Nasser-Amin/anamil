@@ -5,16 +5,31 @@
                 <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner">
                         <div class="carousel-item active" >
+                        @if ($product->type == 'group')
+                            <span class="badge badge-info" style="position: absolute;right:0">{{__('text.Group')}}</span>
+                            @if ($product->sale > 0)
+                                <span class="badge badge-danger" style="position: absolute;">{{__('text.Price after sale')}}</span>
+
+                            @endif
+                        @endif
                             <img src="{{$product->image}}" class="d-block w-100" alt="..." >
                         </div>
+
                         @foreach($product->images as $image)
                             <div class="carousel-item">
+                                @if ($product->type == 'group')
+                                <span class="badge badge-info" style="position: absolute;right:0">{{__('text.Group')}}</span>
+                                    @if ($product->sale > 0)
+                                        <span class="badge badge-danger" style="position: absolute;">{{__('text.Price after sale')}}</span>
+
+                                    @endif
+                                @endif
                                 <img src="{{$image->name}}" class="img-fluid d-block w-100 h-100" alt="...">
                             </div>
                         @endforeach
                     </div>
                 </div>
-                <div class="news-grid-box">
+                <div class="news-grid-box"  style="border-radius:50% ">
                     <div class="dropdown float-right">
                         <a href="#" class="dropdown-toggle card-drop arrow-none text-white" data-toggle="dropdown" aria-expanded="false">
                             <div><i class="mdi mdi-dots-horizontal h4 m-0 text-muted"></i></div>
@@ -29,6 +44,10 @@
                     </div>
                 </div>
             </div>
+
+
+
+
             <div class="news-grid-txt">
                 @can('isAdmin')
                     <div class="row justify-content-between align-items-center">
@@ -47,65 +66,79 @@
                     <input wire:click.prevent="updateStatus({{ $product->id }})" type="checkbox" {{ $product->isActive == 1 ? "checked" : '' }}>
                 </div>
                 @endcan
+                @if($product->type == 'group')
+                <h5>@lang('text.Products')</h5>
+                <div class="table-responsive col" style="height: auto!important;max-height:80px;overflow-y:scroll">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                        @forelse ($product->child_products()->withTrashed()->get() as $child)
+                        <tr>
+                            <th style="font-size: larger">
+                                {{ app()->getLocale() == 'ar' ? $child->name_ar : $child->name_en }}
 
-                 <br><span class="text-pink"> {{__('text.Colors')}} </span>
-                <ul class="" style="height: auto!important;max-height:200px;overflow-y:scroll">
-                    {{-- @foreach($product->colors as $row)
-                        <li class="row  w-100 d-flex flex-column  ">
-                            <div>
-                                <span style="background-color: {{ $row->color }}; width:30px;height:30px;border-radius:50%;display:inline-block"></span>
-                            </div>
-                            <div>
-                                 @if ($row->sale == 0 || $row->sale == null)
-                                <span class="text-pink"> {{__('text.Price')}} </span>| <span class="text-muted">{{$row->price}} {{ app()->getLocale() == 'ar' ? 'ر.س' : 'SAR' }}</span>
-                                @else
-                                    <span class="text-pink"> {{__('text.Price')}} </span>| <span class="text-muted"><del>{{$row->price}}</del> {{$row->sale}} {{ app()->getLocale() == 'ar' ? 'ر.س' : 'SAR' }}</span>
+                                @if($child->deleted_at)
+                                    <i class="mdi mdi-alert-decagram text-danger"></i>
                                 @endif
-                            </div>
-                            <div>
-                                <span class="text-pink"> ({{__('text.Size')}} , {{__('text.Quantity')}})</span>|
-                                @foreach ($row->sizes as $size)
-                                @if($size->stock == 0)
-                                    <del  class="text-danger">({{$size->size}} , {{ $size->stock }})</del>
-                                @else
-                                    <span  class="text-muted">({{$size->size}} , {{ $size->stock }})</span>
-                                @endif
-                                @endforeach
-                            </div>
 
-                        </li>
-                    @endforeach --}}
-                </ul>
+                            </th>
+                            <td>{{ $child->pivot->quantity }}</td>
+
+                        </tr>
+
+                        @empty
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+
                 <ul>
-                    <li><br><span class="text-pink">{{__('text.Type Of Fabric')}}</span>
-                        |<span class="text-muted">{{ $product->typeOfFabric }}</span>
+                    <li><br><span class="text-pink">{{__('text.Price')}}</span>
+                        @if (!$product->sale)
+                        <span class="text-pink"> {{__('text.Price')}} </span>| <span class="text-muted">{{$product->price}} @lang('text.SAR')</span>
+                        @else
+                            <span class="text-pink"> {{__('text.Price')}} </span>| <span class="text-muted"><del>{{$product->price}}</del> {{$product->sale}} @lang('text.SAR')</span>
+                        @endif                    </li>
+                    <li><br><span class="text-pink">{{__('text.Stock')}}</span>
+                        |<span class="text-muted">{{$product->stock}}</span>
                     </li>
-                    <li><br><span class="text-pink">{{__('text.Type Of Sleeve')}}</span>
-                        |<span class="text-muted">{{$product->typeOfSleeve}}</span>
-                    </li>
-
+                    @can('isAdmin')
                     <li><br><span class="text-pink">{{__('text.Category Name')}}</span>
                     |<span class="text-pink">
-                        <a @can('isAdmin')
+                        <a
                         href="/admin/category/{{$product->category()->withTrashed()->first()->id}}-{{$product->category()->withTrashed()->first()->slug}}"
-                        @endcan
+
                           >{{app()->getLocale() == 'ar'? $product->category()->withTrashed()->first()->name_ar : $product->category()->withTrashed()->first()->name_en}}</a></span>
                     </li>
+                    @endcan
                 </ul>
 
                 @if($product->description_ar || $product->description_en)
-                <span class="text-pink">{{__('text.Description')}}</span>
-                <div class="slimscroll description_scroll mb-0">{{app()->getLocale() == 'ar' ?$product->description_ar:$product->description_en}}</div>
+                    <span class="text-pink">{{__('text.Description')}}</span>
+                    <div class="slimscroll description_scroll mb-0">{{app()->getLocale() == 'ar' ?$product->description_ar:$product->description_en}}</div>
                 @endif
 
-                {{-- @can('update',$product) --}}
-                @can('isAdmin')
-                <button id="changeFeatured" wire:click.prevent="updateFeatured({{$product->id}})" class="btn btn-{{$product->featured == 0 ? "secondary":"primary"}} mt-3 btn-rounded btn-bordered waves-effect width-md waves-light text-white d-block mx-auto w-75">{{__('text.Featured')}} <i class="far fa-star"></i></button>
-                @endcan
-                {{-- @can('isAdmin')
-                <button id="changeSliderFeatured" wire:click.prevent="updateAdminFeatured({{$product->id}})" class="btn btn-{{$product->featured_slider == 0 ? "secondary":"primary"}} mt-3 btn-rounded btn-bordered waves-effect width-md waves-light text-white d-block mx-auto w-75">{{__('text.Featured slider')}} <i class="far fa-star"></i></button>
-                @endcan --}}
+
+
+                @if($product->stock > 0 && !checkCollectionActive($product))
+                    @can('isAdmin')
+                        <button id="changeFeatured" wire:click.prevent="updateFeatured({{$product->id}})" class="btn btn-{{$product->featured == 0 ? "secondary":"primary"}} mt-3 btn-rounded btn-bordered waves-effect width-md waves-light text-white d-block mx-auto w-75">{{__('text.Featured')}} <i class="far fa-star"></i></button>
+                    @endcan
+                @endif
+                @if (checkCollectionActive($product))
+                <div class="alert alert-danger">@lang('text.In active collection becouse there are some data missing')</div>
+
+                @endif
+                @if ($product->stock <= 0)
+                <div class="alert alert-danger">@lang('text.Out of Stock')</div>
+
+                @endif
+
             </div>
+
+
+
+
         </div>
     </div>
 @empty

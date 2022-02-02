@@ -66,7 +66,7 @@
                             </div>
 
                             <div class="col-md-2 col-sm-12">
-                                <button type="button" wire:click="deleteProduct({{$index}})" class="btn btn-danger btn_remove w-100">{{__("text.Delete")}}</button>
+                                <button type="button" wire:click="deleteProduct({{$index}})" class="btn btn-danger btn_remove w-100" wire:loading.attr="disabled" wire:target="deleteProduct,addProduct">{{__("text.Delete")}}</button>
                             </div>
                         </div>
                     @empty

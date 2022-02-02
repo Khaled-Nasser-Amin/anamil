@@ -59,7 +59,11 @@ class ProductController extends Controller
 
     public function show(Request $request,Product $product,$slug){
         $this->authorize('view',$product);
-        $images[]=['name' => $product->image];
+
+        $images[]=$product->image;
+        foreach($product->images->pluck('name') as $img){
+            $images[]=$img;
+        }
         return view('admin.productManagement.products.show',compact('product','images'));
     }
     public function addNewProduct(){

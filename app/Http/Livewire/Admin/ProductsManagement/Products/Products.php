@@ -18,9 +18,11 @@ class Products extends Component
     use WithPagination,AuthorizesRequests;
     public $price;
     public $category;
-    public $productName;
+    public $search;
     public $store_name;
     public $date;
+    public $stock;
+    public $type;
     public $filterProducts;
 
     protected $listeners=['delete'];
@@ -32,8 +34,10 @@ class Products extends Component
         if($product){
             $this->category=$product->category_id;
             $this->size=$product->size;
+            $this->type=$product->type;
+            $this->stock=$product->stock;
             $this->date=$product->created_at;
-            $this->productName=app()->getLocale() == 'ar' ? $product->name_ar:$product->name_en;
+            $this->search=app()->getLocale() == 'ar' ? $product->name_ar:$product->name_en;
         }
 
         session()->forget(['product_id']);
@@ -61,10 +65,18 @@ class Products extends Component
         $this->authorize('delete',$product);
         $cat=$product->category;
         $instance=new ProductController();
-        $vendor_id=$instance->destroy($product);
-        if($cat && $cat->products->count() == 0){
-            // $this->deleteCategoryStatus($cat);
+        if($product->type == 'group'){
+            $stock=$product->stock;
+            foreach($product->child_products()->withTrashed()->get() as $child){
+                $child->update(['stock' => $child->stock+($stock*$child->pivot->quantity)]);
+                $child->save();
+            }
+
+            $product->update(['stock' => 0]);
+            $product->save();
         }
+        $vendor_id=$instance->destroy($product);
+
         session()->flash('success',__('text.Product Deleted Successfully') );
         create_activity('Product Deleted',auth()->user()->id,$vendor_id);
 
@@ -75,6 +87,9 @@ class Products extends Component
     //update product's featured
     public function updateFeatured(Product $product){
         $this->authorize('update',$product);
+        if(checkCollectionActive($product)){
+            return ;
+        }
         $numberOfProducts=auth()->user()->products->where('featured',1)->count();
         if ($numberOfProducts < 6 || $product->featured == 1){
             if($product->featured == 0 ){
@@ -94,14 +109,15 @@ class Products extends Component
         }
 
     }
-
-
-    //update product's featured by admin  for slider
-    // public function updateAdminFeatured(Product $product){
+    // public function updateFeatured(Product $product){
     //     Gate::authorize('isAdmin');
-    //     $numberOfProducts=Product::where('featured_slider',1)->count();
-    //     if ($numberOfProducts < 10 || $product->featured_slider == 1){
-    //         if($product->featured_slider == 0 ){
+    //     if(checkCollectionActive($product)){
+    //         return ;
+    //     }
+    //     $numberOfProducts=Product::where('featured',1)->count();
+    //     $allowed_featured_products=Setting::find(1)->no_of_featured_products;
+    //     if ($numberOfProducts < $allowed_featured_products || $product->featured == 1){
+    //         if($product->featured == 0 ){
     //             $featured= 1;
     //             create_activity('Added a product as a feature',auth()->user()->id,$product->user_id);
 
@@ -111,13 +127,15 @@ class Products extends Component
     //         }
 
     //         $product->update([
-    //             'featured_slider'=>$featured
+    //             'featured'=>$featured
     //         ]);
     //     }else{
-    //         $this->dispatchBrowserEvent('danger',__('text.You have only 10 special products'));
+    //         $this->dispatchBrowserEvent('danger',__('text.You have only'). $allowed_featured_products . __('text.special products'));
     //     }
 
     // }
+
+
 
     //change product status
     public function updateStatus(Product $product){
@@ -146,32 +164,30 @@ class Products extends Component
     //search and return products paginated
     protected function search(){
        return Product::
-        //    join('colors','colors.product_id','products.id')->select('products.*')->join('sizes','sizes.color_id','colors.id')->select('products.*')
-        //    ->when(auth()->user()->role != 'admin' || $this->filterProducts == 'My Products',function ($q) {
-        //     return $q->where('user_id',auth()->user()->id);
-        //     })
-        //     ->when($this->price,function ($q) {
-        //             return $q->where('colors.price','=',$this->price)->select('products.*');
-        //     })
-
-        // ->
-        // when($this->size,function ($q) {
-        //     return $q->where('sizes.size','like','%'.$this->size.'%')->select('products.*');
-        // })
-        // ->
-        when($this->store_name,function ($q) {
+       when($this->store_name,function ($q) {
             return $q->join('users','users.id','=','products.user_id')
             ->where('users.store_name','like','%'.$this->store_name.'%')->select('products.*');
         })
         ->where(function($q){
-            return  $q->when($this->productName,function ($q){
-                    return $q->where('products.name_ar','like','%'.$this->productName.'%')
-                    ->orWhere('products.name_en','like','%'.$this->productName.'%');
+            return
+                $q->where(function($q){
+                    $q->when($this->search,function ($q){
+                        return $q->where('products.name_ar','like','%'.$this->search.'%')
+                        ->orWhere('products.name_en','like','%'.$this->search.'%')
+                        ->orWhere('products.description_ar','like','%'.$this->search.'%')
+                        ->orWhere('products.description_en','like','%'.$this->search.'%');
+                    });
                 })
                 ->when($this->category,function ($q){
                         return $q->where('products.category_id',$this->category);
                 })
-                    ->when($this->date,function ($q)  {
+                ->when($this->type,function ($q){
+                        return $q->where('products.type',$this->type);
+                })
+                ->when($this->stock,function ($q){
+                        return $q->where('products.stock',$this->stock);
+                })
+                ->when($this->date,function ($q)  {
                     return $q->whereDate('products.created_at',$this->date);
                 });
             })

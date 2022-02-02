@@ -2,18 +2,22 @@
     <form class="row justify-content-center" method="get" action="{{--{{route('products.index')}}--}}">
         <div class="col-sm-6 col-md-3">
             <div class="form-group">
-                <label for="category_name" class="control-label">{{__('text.Category Name')}}</label>
-                <select id="category_name" class="form-control" wire:model="category">
-                    <option value="" selected class="bg-secondary text-white">- {{__('text.Choose Category')}}</option>
-                    {{-- @foreach(\App\Models\Category::withTrashed()->where('parent_id',0)->get() as $category)
-                    @php
-                    recursion($category->id,'- ','bg-secondary');
-                    @endphp
-                    @endforeach --}}
-                </select>
+                <label for="field-00" class="control-label">{{__('text.Search')}}</label>
+                <input type="text" wire:model="search" class="form-control" id="field-00" placeholder="{{__('text.Product Name')}},{{ __('text.Description') }}">
             </div>
         </div>
         @can('isAdmin')
+            <div class="col-sm-6 col-md-3">
+                <div class="form-group">
+                    <label for="category_name" class="control-label">{{__('text.Category Name')}}</label>
+                    <select id="category_name" class="form-control" wire:model="category">
+                        <option value="" selected class="bg-secondary text-white">- {{__('text.Choose Category')}}</option>
+                        @foreach(\App\Models\Category::withTrashed()->get() as $category)
+                        <option value="{{ $category->id }}" class="bg-secondary text-white">{{ app()->getLocale() == 'ar' ? $category->name_ar : $category->name_en }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div class="col-sm-6 col-md-3">
 
                 <div class="form-group">
@@ -34,29 +38,25 @@
                 </div>
             </div>
         @endcan
+
         <div class="col-sm-6 col-md-3">
             <div class="form-group">
-                <label for="field-00" class="control-label">{{__('text.Product Name')}}</label>
-                <input type="text" wire:model="productName" class="form-control" id="field-00" placeholder="{{__('text.Product Name')}}...">
+                <label for="field-0" class="control-label">{{__('text.Stock')}}</label>
+                <input type="text" wire:model="stock" class="form-control" id="field-0">
             </div>
         </div>
         <div class="col-sm-6 col-md-3">
+
             <div class="form-group">
-                <label for="field-0" class="control-label">{{__('text.Type Of Fabric')}}</label>
-                <input type="text" wire:model="typeOfFabric" class="form-control" id="field-0" placeholder="الندى">
+                <label for="filterProducts" class="control-label">{{__('text.Type')}}</label>
+                <select id="filterProducts" class="form-control" wire:model="type">
+                    <option value="" selected class="bg-secondary text-white"></option>
+                    <option value="single"  class="bg-secondary text-white">@lang('text.Single product')</option>
+                    <option value="group"  class="bg-secondary text-white">@lang('text.Group of Products')</option>
+
+                </select>
             </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <div class="form-group">
-                <label for="field-2" class="control-label">{{__('text.Type Of Sleeve')}}</label>
-                <input type="text" wire:model="typeOfSleeve" class="form-control" id="field-2" placeholder="مربع">
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <div class="form-group">
-                <label for="field-4" class="control-label">{{__('text.Size')}}</label>
-                <input type="text" wire:model="size" class="form-control" id="field-4" placeholder="42">
-            </div>
+
         </div>
         <div class="col-sm-6 col-md-3">
             <div class="form-group">

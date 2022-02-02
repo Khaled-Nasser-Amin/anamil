@@ -119,7 +119,7 @@
 
 
             <div class="text-center col-12">
-                <button type="submit" class="btn btn-success waves-effect waves-light">{{__('text.Submit')}}</button>
+                <button type="submit" wire:loading.attr="disabled" wire:target="image,groupImage" class="btn btn-success waves-effect waves-light">{{__('text.Submit')}}</button>
             </div>
         </div>
 

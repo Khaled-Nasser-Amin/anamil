@@ -93,15 +93,32 @@ use WithFileUploads,AuthorizesRequests,ImageTrait;
     public function update($id){
         $this->authorize('update',$this->product);
         $productUpdate=new ProductController();
-        $data=$this->validation(['image' => 'nullable|mimes:jpg,png,jpeg,gif']);
-        $product=$productUpdate->update($data,$id);
-        $this->updateColorsAndPrice ($product);
-        if($product->wasChanged('category_id')){
-            $new_cat=Category::find($product->category_id);
-            $old_cat=Category::find($this->product->category_id);
-            $this->updateCategoryStatus($new_cat);
-            $this->deleteCategoryStatus($old_cat);
+        if($this->type == 'single'){
+            $data=$this->validation($this->imageValidationForUpdate());
+        }else{
+            $data=$this->validation(array_merge($this->imageValidationForUpdate(),$this->group_validation()));
+            $diff=collect($this->product->child_products->pluck('id'))->diff(collect($this->productsIndex)->pluck('product_id'));
+            foreach($diff as $value){
+                $old_stock=$this->product->stock;
+                $old_quantity=$this->product->child_products->where('id',$value)->first()->pivot->quantity;
+                $child_product=Product::find($value);
+                $child_product->update(['stock' => ($old_stock*$old_quantity)+$child_product->stock]);
+                $child_product->save();
+            }
         }
+
+        $product=$productUpdate->update($data,$id);
+
+        if($this->type == 'group'){
+            $this->groupType($product);
+        }
+
+        if($this->groupImage){
+            $this->livewireDeleteGroupOfImages($product->images,'products');
+            $product->images()->delete();
+            $this->associateImagesWithProduct($data,$product);
+        }
+
 
         if($product->wasChanged()){
             create_activity('Product Updated',auth()->user()->id,$product->user_id);
@@ -260,6 +277,7 @@ use WithFileUploads,AuthorizesRequests,ImageTrait;
     public function groupType($product)
     {
         if ($this->type == 'group') {
+           $product->child_products()->detach();
             foreach ($this->productsIndex as $value) {
                 $child_product=Product::find($value['product_id']);
                 $child_product->update(['stock' => $value['calc']]);

@@ -707,7 +707,7 @@ return [
     'Anywhere'=>'Anywhere',
     'Shipping place'=>'Shipping place',
     'Out of stock'=>'Out of stock',
-    ''=>'',
+    'In active collection becouse there are some data missing'=>'In active collection becouse there are some data missing',
     ''=>'',
     ''=>'',
     ''=>'',
