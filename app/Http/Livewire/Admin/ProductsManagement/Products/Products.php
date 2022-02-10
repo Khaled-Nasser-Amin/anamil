@@ -49,14 +49,12 @@ class Products extends Component
         $setting=Setting::find(1);
         $products=$this->search();
 
-
         return view('admin.productManagement.products.index',compact('products','categories','setting'))->extends('admin.layouts.appLogged')->section('content');
     }
 
 
 
     public function confirmDelete($id){
-
         $this->emit('confirmDelete',$id);
     }
 
