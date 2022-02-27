@@ -33,7 +33,7 @@ class AuthController extends Controller
                 if($user->activation != 0 ){
                     Auth::guard('customer')->login($user);
                     $token=$user->createToken('customer token',['customer'])->accessToken;
-                    return $this->success(['user'=> $user,'token' => $token],'logged in successfully' , 200);
+                    return $this->success(['user'=> $user,'token' => $token,'key' => ''],'logged in successfully' , 200);
 
                 }else{
                     return $this->generateCode($user,400);
@@ -63,12 +63,16 @@ class AuthController extends Controller
         app()->setlocale($request->lang);
         $validator=Validator::make($request->all(),$this->rules());
         if ($validator->fails()){
-            return response()->json($validator->errors(),404);
+            $errors=collect($validator->errors())->map(function($q){
+                return $q[0];
+            });
+            return response()->json($errors,404);
         }
         $data=$request->except('password');
         $data['password']=bcrypt($request['password']);
         $code=substr(str_shuffle('1234567890'),0,6);
         $data['code']=$code;
+        $data['activation']="0";
         $user=Customer::create($data);
         return $this->SendCode($user,200);
     }
@@ -80,7 +84,7 @@ class AuthController extends Controller
             $user->save();
             Auth::guard('customer')->login($user);
             $token=$user->createToken('customer token',['customer'])->accessToken;
-            return $this->success(['user'=> $user,'token' => $token],__('text.Created Successfully'),200);
+            return $this->success(['user'=> $user,'token' => $token,'key' => ''],__('text.Created Successfully'),200);
         }else{
             return $this->error(__('text.Invalid Code!'),404);
         }
@@ -103,7 +107,7 @@ class AuthController extends Controller
 
             if(filter_var($request->username ,FILTER_VALIDATE_EMAIL)){
                 Mail::to($user->email)->send(new SendCode($user->code,$user->name));
-                return $this->success(['user' => $user],__('text.We have sent a verification code to your email').":".$user->email,200);
+                return $this->success(['user' => $user,'token' => '','key' => ''],__('text.We have sent a verification code to your email').":".$user->email,200);
             }elseif(is_numeric($request->username)){
                 return $this->SendCode($user,200);
             }
@@ -121,7 +125,7 @@ class AuthController extends Controller
                     'code' => null,
                 ]);
                 $user->save();
-                return $this->success(['user' => $user,'key' => $user->password],'', 200);
+                return $this->success(['user' => $user,'token' => '','key' => $user->password],'', 200);
             } else {
                 return $this->error(__('text.Invalid Code!'), 404);
             }
@@ -135,7 +139,10 @@ class AuthController extends Controller
 
         $validator=Validator::make($request->all(),['password' => 'required|min:8','key' => 'required']);
         if ($validator->fails()){
-            return response()->json($validator->errors(),404);
+            $errors=collect($validator->errors())->map(function($q){
+                return $q[0];
+            });
+            return response()->json($errors,404);
         }
         $user=Customer::find($request->user_id);
         if($user) {
@@ -146,7 +153,7 @@ class AuthController extends Controller
                 $user->save();
                 Auth::guard('customer')->login($user);
                 $token=$user->createToken('customer token',['customer'])->accessToken;
-                return $this->success(['user'=> $user,'token' => $token],__('text.Password Changed Successfully'),200);
+                return $this->success(['user'=> $user,'token' => $token,'key' => ''],__('text.Password Changed Successfully'),200);
 
             }else{
                 return $this->error(__('text.User does not exist in our records'),404);
@@ -193,7 +200,7 @@ class AuthController extends Controller
             return $this->success(['user' => $user],__('text.We have sent a verification code to your number').":".$user->phone,$status);
         }else{
             Mail::to($user->email)->send(new SendCode($user->code,$user->name));
-            return $this->success(['user' => $user],__('text.We have sent a verification code to your email').":".$user->email,$status);
+            return $this->success(['user' => $user,'token' => '','key' => ''],__('text.We have sent a verification code to your email').":".$user->email,$status);
 
         }
     }

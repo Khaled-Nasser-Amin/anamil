@@ -15,13 +15,13 @@ class UserSeeder extends Seeder
             'role' => 'admin',
             'activation' => 1,
             'add_product' => 1,
-            'store_name' => 'lady_store',
+            'store_name' => 'anamil',
             'location' => 'Riyadh-الرياض',
             'email' => 'admin@admin.com',
             'password' => bcrypt('admin'),
-            'phone' => "01025070424",
+            'phone' => "11111111111",
             'geoLocation' => '24.502081271239774,40.94955767784802',
-            'whatsapp' => "01025070424",
+            'whatsapp' => "111111111111",
         ]);
     }
 }

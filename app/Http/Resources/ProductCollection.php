@@ -15,12 +15,20 @@ class ProductCollection extends JsonResource
      */
     public function toArray($request)
     {
-        if($this->isActive == 1 && $this->sizes->sum('stock') > 0){
-            return [
+        if($this->isActive == 1 && $this->stock > 0 && !checkCollectionActive($this)){
+            $quantity=[];
+            if($this->pivot && $this->pivot->quantity > 0){
+                $quantity=['quantity' =>(string) $this->pivot->quantity];
+            }
+            return array_merge([
                     'name' => app()->getLocale() == 'ar' ? $this->name_ar:$this->name_en,
                     'image' => $this->image,
-                    'id' => $this->id,
-                 ];
+                    'type' => $this->type,
+                    'price' => $this->price."",
+                    'sale' => $this->sale."",
+                    'sale_precentage' => ($this->sale > 0 ? round((($this->price - $this->sale)*100)/$this->price) : 0)."%" ,
+                    'id' => (string) $this->id,
+            ],$quantity);
         }
 
     }

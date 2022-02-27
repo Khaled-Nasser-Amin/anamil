@@ -7,10 +7,9 @@
                         <div class="carousel-item active" >
                         @if ($product->type == 'group')
                             <span class="badge badge-info" style="position: absolute;right:0">{{__('text.Group')}}</span>
-                            @if ($product->sale > 0)
-                                <span class="badge badge-danger" style="position: absolute;">{{__('text.Price after sale')}}</span>
-
-                            @endif
+                        @endif
+                        @if ($product->sale > 0)
+                            <span class="badge badge-danger" style="position: absolute;">{{__('text.Sale')}}</span>
                         @endif
                             <img src="{{$product->image}}" class="d-block w-100" alt="..." >
                         </div>
@@ -19,11 +18,12 @@
                             <div class="carousel-item">
                                 @if ($product->type == 'group')
                                 <span class="badge badge-info" style="position: absolute;right:0">{{__('text.Group')}}</span>
-                                    @if ($product->sale > 0)
-                                        <span class="badge badge-danger" style="position: absolute;">{{__('text.Price after sale')}}</span>
+
+                                @endif
+                                @if ($product->sale > 0)
+                                        <span class="badge badge-danger" style="position: absolute;">{{__('text.Sale')}}</span>
 
                                     @endif
-                                @endif
                                 <img src="{{$image->name}}" class="img-fluid d-block w-100 h-100" alt="...">
                             </div>
                         @endforeach

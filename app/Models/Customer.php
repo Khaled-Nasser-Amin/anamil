@@ -41,6 +41,13 @@ class Customer extends Authenticatable
 
     }
 
+    public function getIdAttribute($value){
+        return (string) $value ;
+    }
+    public function getActivationAttribute($value){
+        return (string) $value ;
+    }
+
     public function getImageAttribute($value){
         return $value ? asset('images/users/'.$value):'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
     }

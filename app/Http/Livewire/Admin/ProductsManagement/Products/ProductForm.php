@@ -58,9 +58,8 @@ use WithFileUploads,AuthorizesRequests,ImageTrait;
         $this->associateImagesWithProduct($data,$product);
         $this->resetVariables();
         $this->dispatchBrowserEvent('success', __('text.Product Added Successfully'));
+        $this->emit('refreshMultiSelect');
         create_activity('Product Created',auth()->user()->id,$product->user_id);
-
-
     }
 
 
@@ -184,7 +183,7 @@ use WithFileUploads,AuthorizesRequests,ImageTrait;
         $this->reset([
             'name_ar', 'name_en',
             'description_ar', 'description_en', 'image',
-            'groupImage', 'slug', 'category_id', 'taxes_selected', 'sale', 'price', 'productsIndex'
+            'groupImage', 'slug', 'category_id', 'taxes_selected', 'sale','stock', 'price', 'productsIndex'
         ]);
         $this->productsIndex[]=['product_id' => '','quantity' => '' ,'stock' => '','calc' => ''];
 
@@ -234,7 +233,7 @@ use WithFileUploads,AuthorizesRequests,ImageTrait;
     }
     public function change_quantity($index, $quantity)
     {
-        if($this->action == 'update('.$this->product->id.')'&& $this->product->child_products->where('id',$this->productsIndex[$index]['product_id'])->first()){
+        if($this->product&&$this->action == 'update('.$this->product->id.')'&& $this->product->child_products->where('id',$this->productsIndex[$index]['product_id'])->first()){
             $old_stock=$this->product->stock;
             $old_quantity=$this->product->child_products->where('id',$this->productsIndex[$index]['product_id'])->first()->pivot->quantity;
             (int) $this->productsIndex[$index]['calc']=(int) $this->productsIndex[$index]['stock'] - (( (int) $this->stock* (int) $quantity) - ($old_stock*$old_quantity));
